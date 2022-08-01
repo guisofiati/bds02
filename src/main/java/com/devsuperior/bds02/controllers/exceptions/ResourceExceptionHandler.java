@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.devsuperior.bds02.services.exceptions.DatabaseException;
 import com.devsuperior.bds02.services.exceptions.ResourceNotFoundException;
 
 @ControllerAdvice
@@ -21,6 +22,18 @@ public class ResourceExceptionHandler {
 		error.setTimestamp(Instant.now());
 		error.setStatus(status.value());
 		error.setError("Resource not found");
+		error.setMessage(e.getMessage());
+		error.setPath(req.getRequestURI());
+		return ResponseEntity.status(status).body(error);
+	}
+	
+	@ExceptionHandler(DatabaseException.class)
+	public ResponseEntity<StandardError> resourceNotFound(DatabaseException e, HttpServletRequest req) {
+		StandardError error = new StandardError();
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		error.setTimestamp(Instant.now());
+		error.setStatus(status.value());
+		error.setError("Database integrity violation");
 		error.setMessage(e.getMessage());
 		error.setPath(req.getRequestURI());
 		return ResponseEntity.status(status).body(error);
